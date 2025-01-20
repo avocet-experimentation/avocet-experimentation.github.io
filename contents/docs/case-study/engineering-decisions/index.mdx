@@ -1,0 +1,91 @@
+---
+title: Engineering Decisions
+description: This section provides an overview of Background.
+---
+
+## Optimize for Read Operations on Feature Flags
+
+For flag and experiment data, we expected a low, and roughly constant, write rate since the number of concurrent users signed into the dashboard is unlikely to scale to even a few dozen. However, we had to prepare for a very high read rate, since read volume scales directly with the number of concurrent client applications using our feature flags. Slow reads risked degrading client UX by delaying initial caching of flag data, and possibly by increasing the number of dropped requests, forcing client apps to fall back onto stale or null values. We chose to optimize very heavily for read performance, even at the expense of write performance.
+
+![High Concurrent Clients](/high-concurrent-clients.png)
+
+We did this by storing feature flags and experiments in a document database (MongoDB), denormalizing override rules into feature flags, building indexes to support common queries, and building our data access layer per the data mapper pattern.
+
+### Use document database
+
+MongoDB offered us some key advantages over relational databases. We could more easily query and update fields on denormalized M:M data (discussed further below), which, if using a relational database, would best be stored as some bulk representation such as blob or JSON. We could also build indexes on keys of objects nested within arrays or on the keys of dictionaries stored on documents, significantly accelerating certain read operations.
+
+One tradeoff with using MongoDB over relational DBMSs was the loss of database-level schema validation. To mitigate this issue, we implemented runtime type validation on all create and update operations in our repository classes. After prototyping a few options (see Implementing Runtime Type Validation), we chose Zod for readable schema, parsing performance, compatibility, and the ability to infer static types from Zod schema. The latter feature ensured we maintained a single source of truth for types, which was especially useful when working with complex objects such as experiments.
+
+![Zod Runtime Validation](/runtime-validation.png)
+
+### Denormalize override rules
+
+Denormalization is the duplication of data, typically to avoid JOINs or comparable multi-row lookups. This can improve read performance, but increases write costs and introduces the risk that data may not remain in sync.
+
+Each time a client requests the value of a feature flag, the flagging API selects the override rules the flag has on that environment, and attempts to enroll the client in each rule sequentially until one is applied or enrollment fails for all of them. Since a flag’s override rules need to be accessed every time the flag itself is read, and since clients requesting flag values is expected to drive the overwhelming majority of database queries, we denormalize override rules into feature flags. Experiments are also a form of override rule, however, denormalizing them was not straightforward since an experiment can involve many feature flags, and each flag can be used in any number of experiments. Additionally experiments can exist as drafts without any feature flags assigned to them. So experiments couldn’t simply be embedded into flags.
+
+We opted to denormalize experiments partially per the
+<a href="https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern" target="_blank" rel="noopener">extended reference pattern</a>,
+in which a document stores frequently used fields of another document that it references in addition to the other document’s primary key. This meant storing on feature flags only the experiment fields needed to test clients for enrollment, while keeping the full experiment object in its own document. As a result, we could fetch a flag, test for enrollment in any override rules that existed in the client’s environment, and only fetch experiments when a client is enrolled in one. We discuss the challenges that arose while implementing this pattern here.
+
+### Index to support common read patterns
+
+Since the expected write volume was so low, we were free to build indexes liberally. To speed up the fetching of flags enabled on a given environment, we indexed on environment names in both flags. For fetching flags that contained references to a given experiment, we indexed on the IDs of override rules.
+
+### Manage data using the Data Mapper pattern
+
+We opted to manage data using the
+<a href="https://en.wikipedia.org/wiki/Data_mapper_pattern" target="_blank" rel="noopener">data mapper pattern</a>
+, a design pattern in which data mappers are classes containing all logic for transferring data between a database and memory. Functions for working with fetched documents such as feature flags and experiments were kept as static methods. These classes also served as a convenient location to place static helper methods for templating and common yet easy-to-get-wrong operations on some of our most complex objects (feature flags and experiments). These operations included adding a feature flag or group to an experiment, or enabling/disabling a feature flag on a given environment.This allowed us to keep feature flag and experiment data as bare objects, avoiding the performance costs of instantiating these objects.
+
+[Diagram]
+
+### Cache feature flag data on clients
+
+We faced a problem when it came to sending feature flag data to clients: if the SDK fetched flag values on demand, checking flag values would happen asynchronously, potentially forcing developers to make inconvenient changes to code structure. We could solve this by caching fetched values and using the cache for flag value checks, but this came with drawbacks of its own: clients would fetch all flags, some of which may not be needed, and flag values would not be guaranteed to be up-to-date.
+
+Since on-demand flag value checks have to be asynchronous to avoid blocking code execution, synchronous code might have to change significantly to accommodate feature flags. Either the surrounding function (and possibly code calling that function, and code calling that code, and so on) would have to be made asynchronous, or it would have to use promise syntax with callbacks, potentially resulting in “callback hell.”
+
+On the other hand, the periodic fetching and caching approach would require fetching all feature flags that existed in a client’s environment, and then caching all those flags in memory. As such, this approach could increase network traffic and memory usage on client applications, which may become problematic if flags are numerous, but only a few flags are used by a given client. This could also have performance implications on the Feature Flag Relay server, where request volume scales linearly with the number of clients, and compute costs scale linearly with the number of feature flags.
+
+Relying on locally cached flag values also presents the risk that values may be out of date at the time they are used to drive application logic. In a scenario where a feature flag is used to limit or disable risky functionality, this delay could be a problem. “Risky” functionality includes any feature that might contain a serious bug, such as one that introduces a security vulnerability or causes irreversible damage to data. One such example would be an application that uses a feature flag on a new payment process. If the flag value is changed but the updated value is not immediately applied, transactions might be executed incorrectly and have to be reversed, possibly damaging the relationship with the customer and incurring penalties with the payment processor.
+
+We chose to fetch and cache flag data by polling periodically (every five minutes by default). This is done by the SDK, which requests the values of all feature flags that are active in its environment, when being initialized on a client app. To mitigate the drawbacks of periodic fetching and caching, we offer three features:
+1. A method for fetching and using up-to-date flag values from the API. This offers developers the option to use cached or live values as they see fit.
+2. A setting to permit stale flags to be used. If set to false, all cached flag data will be erased when new data is fetched.
+3. The ability to customize the polling interval, allowing short intervals to be set.
+
+We planned to offer the best of both options - synchronous flag checks along with up-to-date flag values - using MongoDB change streams on the flagging API and webSocket connections between the API and clients, but decided to keep that out of scope. This is discussed further in the Future Work section.
+
+## Design for Flexible Deployment and Modularity
+
+Experimentation frequently involves recording sensitive data which may be subject to legal and ethical concerns around privacy and confidentiality, as well as company security policies. Avocet would have to comply with all such concerns and policies for organizations to be permitted to use it to conduct experiments. Additionally, feature flagging may require complex horizontal scaling, since flag reads scale directly with the number of end users. However, this could be overkill for smaller projects. Rather than attempt to account for all of these factors internally, we made two choices: 
+1. Provide all Avocet components directly, rather than hosting any infrastructure ourselves, giving users total control over their deployments.
+2. Integrate with any pre-existing telemetry pipeline, preserving control of telemetry data.
+
+Together, this means that Avocet users can keep all experiment data within their infrastructure, allowing them to use our tool while preserving security, privacy, and confidentiality. We discuss how we implemented these choices below.
+
+### Provide components directly
+
+Some applications are deployed to the cloud, others use entirely in-house infrastructure, and many use some combination thereof. Accordingly, one of our first decisions was to distribute Avocet components as Docker images to allow users to deploy it however they want. Various aspects of Avocet have greatly varying scaling and access needs, so we partitioned code into images based on those needs.
+
+The dashboard and admin server are contained in a single image since they share scaling and access needs. The flagging API, on the other hand, scales to both the number of clients and the number of flags and experiments. The Avocet database is only meant to be accessed by the two servers, and will require a different approach to horizontal scaling than the flagging API.
+
+As an example of the flexibility this partitioning permits, the admin server and dashboard can be set up to be accessible only via corporate intranet even if the flagging API needs to be exposed to the wider internet. Since images can be deployed on separate machines, this allows for better-targeted horizontal scaling.
+
+### Integrate with any telemetry pipeline
+
+Avocet permits experimentation with minimal additional code on the users’ end by allowing them to define a callback function that stores certain data on telemetry when flag values are checked. This data includes the feature flag’s name and the value sent to the client, as well as metadata used to identify any experiment (or other override rule) that was applied on the flag for that request, formatted per
+<a href="https://web.archive.org/web/20241119205231/https://opentelemetry.io/docs/specs/semconv/feature-flags/feature-flags-spans/" target="_blank" rel="noopener">OpenTelemetry conventions v1.28</a>
+(this was the latest version at time of development; up-to-date conventions can be found
+<a href="https://opentelemetry.io/docs/specs/semconv/feature-flags/" target="_blank" rel="noopener">here</a>).
+When checking the value of a feature flag, applications have the option of passing a telemetry data object (such as a
+<a href="https://opentelemetry.io/docs/concepts/signals/traces/#spans" target="_blank" rel="noopener">span</a>,
+the building block of a trace), which prompts the SDK to invoke this assignment callback. Since our users define this assignment logic, the SDK requires no knowledge of how the telemetry provider expects data to be formatted and stored.
+
+We also wanted to support pre-existing telemetry databases, for compatibility and ease of installation. This would spare users from having to either split telemetry data across our in-house database and their own, duplicate it across both databases, or migrate their database to ours. As part of the setup process, we instruct users to create a server to handle requests for telemetry, and provide types and GraphQL schema via a package to simplify this process.
+
+Telemetry data may take any form at rest, but when Avocet makes requests to the telemetry server, it expects response data to conform to our type `TransformedSpan`. Since we only need to fetch such data to analyze an experiment once it’s completed, and since experiment analysis is not highly time-sensitive, we expect the compute cost of any requisite transformations to be affordable. Being entirely agnostic to the shape of telemetry data would obviate this transformation, but this would have complicated initial development.
+
+We could have used REST conventions instead of GraphQL by documenting the requests that Avocet would make to the telemetry server and instructing users to write routes against those requests. However, GraphQL is an extremely popular language, and one of its core purposes is to abstract away details of database implementation and offer a standard structure for phrasing requests, which is the whole purpose of the telemetry server. Additionally, using GraphQL allows us to write query schemas, leaving only the implementations of query resolver functions to the user. This makes for an easier and more type-safe setup experience. For these reasons, and for the possibilities that GraphQL extensions offered for the future (such as embedding a GraphiQL widget into the dashboard to provide a query writer with hints), we opted for GraphQL over REST.

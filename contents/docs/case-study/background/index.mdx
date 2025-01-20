@@ -1,0 +1,32 @@
+---
+title: Background
+description: This section provides an overview of Background.
+---
+
+Avocet is an open-source feature flagging and software experimentation platform capable of integrating with any telemetry infrastructure. As a feature flagging platform, it enables developers to distribute new features and changes to end users with the ability to easily and rapidly revert changes from a GUI, instead of having to change code, re-build, and then redeploy the application.
+
+This allows developers to distribute new features with less of the normally associated risks such as unintended negative effects on user experience. Avocet offers support for switchback experimental designs in addition to the more common A/B test, making it an ideal solution for teams seeking to quickly begin experimenting on JavaScript applications where telemetry already exists and A/B tests are not viable.
+
+To better understand Avocet’s use case, we'll look at why experimentation can be useful for software, what A/B and switchback designs are, and what situations call for one of these experimental designs over the other.
+
+## Problem Overview
+
+Commercial software can quickly grow too complex for developers to understand how a new feature or other change could impact user experience and profitability. Without this understanding, teams may take on significant risk when releasing such changes. To manage this risk, they can conduct empirical research by offering multiple versions of their application and statistically analyzing the results along key metrics such as user engagement. Normally, offering multiple versions of an app means they have to build, deploy, and maintain multiple versions of the application. This entails significant development work, even for a single feature. Even more is required if any additional features are to be added, since this work has to be replicated to each version.
+
+[[Diagram]]
+
+Feature flagging greatly simplifies this process, since a single build that utilizes it can offer many versions. Experimentation in turn becomes much easier since experimental treatments (also referred to as “interventions” or “independent variables”) can be defined as a set of flags and the values to set for them during a period of time for a given group of subjects, while observations (dependent variables) can be stored on telemetry data.
+
+The success of an experiment relies greatly on its design. A widely used design, the A/B test, applies a single treatment to each group and runs the groups concurrently. Another design, the switchback test, applies a sequence of treatments, one at a time, to each group. A chief concern in experimental design is ensuring that the treatments applied to one group, and the results of that treatment, don’t influence the results in another group. Some inter-data effects are short-lived but significant; A/B tests are more vulnerable to these, while switchback tests are less so. Other effects accrue over time and pose a greater risk to validity in switchback experiments. The right design ultimately depends on the phenomenon being researched.
+
+![AB vs. Switchback](/ab-vs-switchback.png)
+
+## Existing Solutions
+
+There currently exist several applications that offer experimentation capabilities to varying degrees, each with their own unique strengths and challenges. The platforms that we’ve considered during our project planning phase were Growthbook, Statsig, and LaunchDarkly. While all of these offer feature flagging capabilities, their takes on experimentation differ significantly.
+
+Growthbook is an open-source platform that integrates well with existing data warehouses. While cost-effective, it often requires significant engineering resources for setup and maintenance, making it less accessible for smaller teams or those without technical expertise.
+
+LaunchDarkly is an enterprise platform known for its ease of use and robust feature flagging capabilities. However, it comes with a high price and lacks advanced experimentation and sophisticated data analysis. Setting up complex experiments often demands significant engineering efforts and expertise. 
+
+Statsig is a proprietary platform well-suited for large-scale applications that comes at a large price. While it offers advanced statistical methods, including support for switchback testing, it relies heavily on expert engineering and a steep learning curve. 

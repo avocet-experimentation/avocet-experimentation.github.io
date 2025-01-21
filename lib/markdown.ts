@@ -79,7 +79,7 @@ function sluggify(text: string) {
   return slug.replace(/[^a-z0-9-]/g, "");
 }
 
-function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
+export function getDocsContentPath(slug: string) {
+  return path.join(process.cwd(), "/contents/content/", `${slug}/index.mdx`);
 }
 

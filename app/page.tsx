@@ -27,7 +27,7 @@ export default function Home() {
       </p>
       <div>
         <Link
-          href={`/docs${case_study_routes[0].href}`}
+          href={`/content${case_study_routes[0].href}`}
           className={buttonVariants({
             className: "px-6 !font-medium",
             size: "lg",

@@ -15,7 +15,7 @@ const basePath = isProd ? BASE_PATH : '';
 export const NAVLINKS = [
   {
     title: "Case Study",
-    href: `/docs${case_study_routes[0].href}`,
+    href: `/content${case_study_routes[0].href}`,
     newTab: false,
   },
   {

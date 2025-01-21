@@ -7,7 +7,7 @@ export default function DocsMenu({ isSheet = false }) {
       {CASE_STUDY_ROUTES.map((item, index) => {
         const modifiedItems = {
           ...item,
-          href: `/docs${item.href}`,
+          href: `/content${item.href}`,
           level: 0,
           isSheet,
         };

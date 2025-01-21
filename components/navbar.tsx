@@ -7,9 +7,10 @@ import Anchor from "./anchor";
 import { SheetLeftbar } from "./leftbar";
 import { case_study_routes, documentation_routes } from "@/lib/routes-config";
 import useDarkMode from "../hooks/useDarkMode"
+import { BASE_PATH } from "@/lib/constants";
 
 const isProd = process.env.NODE_ENV === 'production';
-const basePath = isProd ? process.env.BASE_PATH : '';
+const basePath = isProd ? BASE_PATH : '';
 
 export const NAVLINKS = [
   {

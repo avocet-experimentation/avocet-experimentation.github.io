@@ -1,1 +1,4 @@
-export const BASE_PATH = "/dist";
+
+const isProd = process.env.NODE_ENV === 'production';
+
+export const BASE_PATH = isProd ? '/avocet.github.io' : '/dist';

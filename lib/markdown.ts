@@ -9,10 +9,12 @@ import rehypeCodeTitles from "rehype-code-titles";
 
 // custom components imports
 import Note from "@/components/note";
+import CustomImage from "@/components/customImage";
 
 // add custom components
 const components = {
   Note,
+  img: CustomImage,
 };
 
 // can be used for other pages like blogs, Guides etc
@@ -80,3 +82,4 @@ function sluggify(text: string) {
 function getDocsContentPath(slug: string) {
   return path.join(process.cwd(), "/contents/docs/", `${slug}/index.mdx`);
 }
+

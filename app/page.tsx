@@ -5,9 +5,12 @@ import { case_study_routes } from "@/lib/routes-config";
 import Link from "next/link";
 import useDarkMode from "../hooks/useDarkMode"
 
+const isProd = process.env.NODE_ENV === 'production';
+const basePath = isProd ? process.env.BASE_PATH : '';
+
 export default function Home() {
   const isDarkMode = useDarkMode();
-  const logoSrc = `/avocet-logo-with-title-${isDarkMode ? "dark" : "light"}-mode.svg`;
+  const logoSrc = basePath + `/avocet-logo-with-title-${isDarkMode ? "dark" : "light"}-mode.svg`;
 
   return (
     <div className="flex sm:min-h-[91vh] min-h-[88vh] flex-col items-center justify-center text-center px-2 py-8">

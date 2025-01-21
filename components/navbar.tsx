@@ -2,12 +2,14 @@
 
 import { ModeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from 'next/navigation'
 import Anchor from "./anchor";
 import { SheetLeftbar } from "./leftbar";
 import { case_study_routes, documentation_routes } from "@/lib/routes-config";
 import useDarkMode from "../hooks/useDarkMode"
+
+const isProd = process.env.NODE_ENV === 'production';
+const basePath = isProd ? process.env.BASE_PATH : '';
 
 export const NAVLINKS = [
   {
@@ -62,7 +64,7 @@ export function Navbar() {
 
 function Logo() {
   const isDarkMode = useDarkMode();
-  const logoSrc = `/avocet-logo-${isDarkMode ? "dark" : "light"}-mode.svg`;
+  const logoSrc = basePath + `/avocet-logo-${isDarkMode ? "dark" : "light"}-mode.svg`;
 
   return (
     <Link href="/" className="flex items-center gap-3">

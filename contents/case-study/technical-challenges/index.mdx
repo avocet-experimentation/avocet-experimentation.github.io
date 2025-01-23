@@ -42,7 +42,7 @@ We ultimately decided to send plain IDs, as the risks were minor. Later, we may 
 We developed the dashboard and the management API in tandem. The management API underwent frequent changes during development, and this would often break corresponding data-fetching code on the dashboard. Furthermore, these components needed to work with several types of data (feature flags, experiments, environments, and SDK connections; and potentially also client property definitions and dashboard users), each of which would require several routes in the REST model. We decided to use GraphQL to reduce dashboard development friction, speed up API development, and reduce the management API to a single route.
 
 This presented some drawbacks. For one, there were costs associated with learning and implementing GraphQL, which was a new tool to all of us. These costs were acceptable, however, because we already needed to
-<a href="/content/case-study/engineering-decisions#integrate-with-any-telemetry-pipeline">use GraphQL to make our project work with any telemetry database</a>.
+<a href="/case-study/engineering-decisions#integrate-with-any-telemetry-pipeline">use GraphQL to make our project work with any telemetry database</a>.
 More significantly, the GraphQL schema we wrote for the admin API are essentially duplicates of our type definitions, and as such any changes to types in our core package needed to be replicated in the GraphQL schema. However, we could in the future infer GraphQL schema directly from our classes using
 <a href="https://typegraphql.com/" target="_blank" rel="noopener">TypeGraphQL</a>.
 

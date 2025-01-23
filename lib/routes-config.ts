@@ -12,11 +12,7 @@ const CASE_STUDY_ROUTE = "/case-study"
 const DOCUMENTATION_ROUTE = "/documentation"
 
 export const CASE_STUDY_ROUTES: EachRoute[] = [
-  {
-    title: "Case Study",
-    href: CASE_STUDY_ROUTE,
-    noLink: true,
-    items: [
+ 
       { title: "Background", href: "/background" },
       {
         title: "The Avocet Advantage",
@@ -53,8 +49,7 @@ export const CASE_STUDY_ROUTES: EachRoute[] = [
           },
         ]
       },
-    ],
-  },
+
 ];
 
 export const DOCUMENTATION_ROUTES: EachRoute[] = [];

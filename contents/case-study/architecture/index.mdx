@@ -5,9 +5,9 @@ description: This section provides a comprehensive overview of Avocet's technica
 
 Each Avocet installation is comprised of:
 - A MongoDB database for storing
-<a href="/content/case-study/appendices/terminology#feature-flag">feature flags</a>,
+<a href="/case-study/appendices/terminology#feature-flag">feature flags</a>,
 experiments,
-<a href="/content/case-study/appendices/terminology#environment">environments</a>,
+<a href="/case-study/appendices/terminology#environment">environments</a>,
 and other supporting data.
 - An administrative dashboard for managing data stored in Mongo.
 - A management API server that lets the dashboard communicate with MongoDB
@@ -27,7 +27,7 @@ Avocet offers `boolean`, `string`, and `number` flag types to accommodate variou
 ![Feature Flag Types](/feature-flag-types.png)
 
 Flags have a default value, can be toggled on and off per environment (discussed below), and are further customizable through
-“<a href="/content/case-study/appendices/terminology#override-rule">override rules</a>”
+“<a href="/case-study/appendices/terminology#override-rule">override rules</a>”
 that override the flag’s default value within a specific environment. The first type of override rule is the “Forced Value” rule.
 
 Forced Value rules set the value for a flag within a single environment. This rule type is useful for changing functionality in ways that cannot be achieved by simply toggling a flag off in an environment (which would cause its value to evaluate to the global fallback, `null`).
@@ -37,7 +37,7 @@ Forced Value rules set the value for a flag within a single environment. This ru
 ### Experiments
 
 The other type of override rule is the
-<a href="/content/case-study/appendices/terminology#experiment">experiment</a>.
+<a href="/case-study/appendices/terminology#experiment">experiment</a>.
 Experiments aim to evaluate how changes in features, design, or functionality affect user behavior, system performance, or other key metrics. 
 
 In Avocet, subjects (users) are randomly assigned to groups, each of which receives a series of treatments. Experimental treatments are defined by one or more pairings of a feature flag and a value to attribute to that flag, and are assigned a lifespan. One or more treatments can be applied to each group; treatments are applied one at a time during the experiment’s life cycle. Once all treatments have elapsed, an experiment ends.
@@ -77,11 +77,11 @@ On the client-facing side, requests are authenticated by the presence of a valid
 ## Database
 
 Avocet stores feature flags, experiments, environments, and client SDK connections in a MongoDB instance that can be deployed onto a dedicated machine. Schema validation and transactions are implemented on cattails via the Mongo driver.
-<a href="/content/case-study/engineering-decisions#use-a-document-database">A discussion of why we chose MongoDB</a>.
+<a href="/case-study/engineering-decisions#use-a-document-database">A discussion of why we chose MongoDB</a>.
 
 ## Package
 
 Our SDK, offered as a package, permits JavaScript applications to fetch feature flag values from the flagging API. It offers both synchronous and asynchronous flag check methods, each with their own tradeoffs.
-<a href="/content/case-study/engineering-decisions#cache-feature-flag-data-on-clients">For more on this, see cache feature flag data on clients</a>.
+<a href="/case-study/engineering-decisions#cache-feature-flag-data-on-clients">For more on this, see cache feature flag data on clients</a>.
 
 The core package contains type definitions, Zod schema, and GraphQL schema for setting up the telemetry server. We also have an unpublished package that’s used by the management and flagging APIs to interact with our Mongo database.

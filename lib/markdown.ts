@@ -80,6 +80,6 @@ function sluggify(text: string) {
 }
 
 export function getDocsContentPath(slug: string) {
-  return path.join(process.cwd(), "/contents/content/", `${slug}/index.mdx`);
+  return path.join(process.cwd(), "/contents/case-study/", `${slug}/index.mdx`);
 }
 

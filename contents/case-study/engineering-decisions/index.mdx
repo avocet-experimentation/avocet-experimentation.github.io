@@ -16,7 +16,7 @@ We did this by storing feature flags and experiments in a document database (Mon
 MongoDB offered us some key advantages over relational databases. We could more easily query and update fields on denormalized M:M data (discussed further below), which, if using a relational database, would best be stored as some bulk representation such as blob or JSON. We could also build indexes on keys of objects nested within arrays or on the keys of dictionaries stored on documents, significantly accelerating certain read operations.
 
 One tradeoff with using MongoDB over relational DBMSs was the loss of database-level schema validation. To mitigate this issue, we implemented runtime type validation on all create and update operations in our repository classes. After prototyping a few options (see
-<a href="/content/case-study/technical-challenges#implementing-runtime-type-validation">Implementing Runtime Type Validation</a>),
+<a href="/case-study/technical-challenges#implementing-runtime-type-validation">Implementing Runtime Type Validation</a>),
 we chose Zod for readable schema, parsing performance, compatibility, and the ability to infer static types from Zod schema. The latter feature ensured we maintained a single source of truth for types, which was especially useful when working with complex objects such as experiments.
 
 ![Zod Runtime Validation](/runtime-validation.png)
@@ -30,7 +30,7 @@ Each time a client requests the value of a feature flag, the flagging API select
 We opted to denormalize experiments partially per the
 <a href="https://www.mongodb.com/blog/post/building-with-patterns-the-extended-reference-pattern" target="_blank" rel="noopener">extended reference pattern</a>,
 in which a document stores frequently used fields of another document that it references in addition to the other document’s primary key. This meant storing on feature flags only the experiment fields needed to test clients for enrollment, while keeping the full experiment object in its own document. As a result, we could fetch a flag, test for enrollment in any override rules that existed in the client’s environment, and only fetch experiments when a client is enrolled in one. We discuss the challenges that arose while implementing this pattern
-<a href="/content/case-study/technical-challenges#managing-extended-references">here</a>.
+<a href="/case-study/technical-challenges#managing-extended-references">here</a>.
 
 ### Index to support common read patterns
 
@@ -60,7 +60,7 @@ We chose to fetch and cache flag data by polling periodically (every five minute
 3. The ability to customize the polling interval, allowing short intervals to be set.
 
 We planned to offer the best of both options - synchronous flag checks along with up-to-date flag values - using MongoDB change streams on the flagging API and webSocket connections between the API and clients, but decided to keep that out of scope. This is discussed further in the
-<a href="/content/case-study/future-work">Future Work</a>
+<a href="/case-study/future-work">Future Work</a>
 section.
 
 ## Design for Flexible Deployment and Modularity

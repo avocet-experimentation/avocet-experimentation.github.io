@@ -49,7 +49,7 @@ export const CASE_STUDY_ROUTES: EachRoute[] = [
           },
           {
             title: "References",
-            href: "/References",
+            href: "/references",
           },
         ]
       },

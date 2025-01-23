@@ -1,12 +1,17 @@
 ---
 title: Architecture
-description: This section provides an overview of Architecture.
+description: This section provides a comprehensive overview of Avocet's technical architecture, detailing its core components including feature flags, experiments, environments, and SDK connections.
 ---
 
 Each Avocet installation is comprised of:
-- A MongoDB database for storing feature flags, experiments, environments, and other supporting data.
+- A MongoDB database for storing
+<a href="/content/case-study/appendices/terminology#feature-flag">feature flags</a>,
+experiments,
+<a href="/content/case-study/appendices/terminology#environment">environments</a>,
+and other supporting data.
 - An administrative dashboard for managing data stored in Mongo.
-- A server that lets dashboard users query MongoDB, and responds to requests from client applications for feature flag values.
+- A management API server that lets the dashboard communicate with MongoDB
+- A feature flagging API that responds to requests from client applications for feature flag values.
 Additionally, Avocet offers two packages:
 - An SDK package that allows JavaScript applications to request feature flag values
 - A core package with supplementary code used across components.
@@ -21,17 +26,21 @@ Avocet offers `boolean`, `string`, and `number` flag types to accommodate variou
 
 ![Feature Flag Types](/feature-flag-types.png)
 
-Flags have a default value, can be toggled on and off per environment (discussed below), and are further customizable through “override rules” that override the flag’s default value within a specific environment. The first type of override rule is the “Forced Value” rule.
+Flags have a default value, can be toggled on and off per environment (discussed below), and are further customizable through
+“<a href="/content/case-study/appendices/terminology#override-rule">override rules</a>”
+that override the flag’s default value within a specific environment. The first type of override rule is the “Forced Value” rule.
 
-“Forced Value” rules simply set a value for a flag within a single environment. This rule is useful for changing functionality in ways that cannot be achieved by simply toggling a flag off in an environment (which would cause its value to evaluate to the global fallback, `null`).
+Forced Value rules set the value for a flag within a single environment. This rule type is useful for changing functionality in ways that cannot be achieved by simply toggling a flag off in an environment (which would cause its value to evaluate to the global fallback, `null`).
 
 ![Forced Value Override Rule](/forced-value-override-rule.png)
 
 ### Experiments
 
-The other type of override rule is the Experiment. Experiments aim to evaluate how changes in features, design, or functionality affect user behavior, system performance, or other key metrics. 
+The other type of override rule is the
+<a href="/content/case-study/appendices/terminology#experiment">experiment</a>.
+Experiments aim to evaluate how changes in features, design, or functionality affect user behavior, system performance, or other key metrics. 
 
-In Avocet, subjects (users) are randomly assigned to groups, each of which receives a series of treatments. Experimental treatments are defined by one or more pairings of a feature flag and a value to attribute to that flag, and are assigned a duration for which those pairings are to be applied. One or more treatments can be applied to each group; treatments are applied one at a time during the experiment’s life cycle. Once all treatments have elapsed, an experiment ends.
+In Avocet, subjects (users) are randomly assigned to groups, each of which receives a series of treatments. Experimental treatments are defined by one or more pairings of a feature flag and a value to attribute to that flag, and are assigned a lifespan. One or more treatments can be applied to each group; treatments are applied one at a time during the experiment’s life cycle. Once all treatments have elapsed, an experiment ends.
 
 ![Experiment Visualization](/experiment-visualization.png)
 
@@ -41,23 +50,23 @@ When defining an experiment, developers can start from A/B or Switchback templat
 
 ### Environments
 
-In commercial software development processes, it’s common for versions of an application to move through stages, or “environments,” such as “development,” “testing,” and “production.” To support this compartmentalization, Avocet lets users define any number of environments. Override rules customize the behavior of feature flags within a specific environment. This allows for the same application to behave differently depending on how the flagging SDK is configured, which determines the environment the application runs in. This allows Avocet users to provide changes in functionality specifically to development teams, testing and QA teams, or any other groups of their choice.
+In commercial software development processes, it’s common for versions of an application to move through stages, or “environments,” such as “development,” “testing,” and “production.” To support this compartmentalization, Avocet lets users define any number of environments. Override rules customize the behavior of feature flags within a specific environment. This allows developers using Avocet to provide changes in functionality specifically to development teams, testing and QA teams, or any other groups of their choice.
 
 ![Environments Visualization](/environments-visualization.png)
 
 ### SDK Connections
 
-SDK connections enable feature flagging on applications. Each connection has an associated environment and API key, and. An API key must be passed into the SDK when initialized. This key is sent to the feature flagging API along with every request, and if the key doesn’t correspond to an SDK connection, the request is rejected.
+SDK connections can be created in the dashboard to enable applications to connect to the flagging API via the SDK. When setting up a connection, an API key is generated and provided to the user, who then needs to pass this key in the SDK options. The key is then included in requests to the flagging API, which in turn uses this key to authenticate requests and identify what environment the application is running in. Flag values are determined accordingly.
 
 ## Administrative Dashboard
 
-The Admin dashboard is a React application that allows Avocet users to configure and manage feature flags, experiments, and environments. 
+The Admin dashboard is a React application that allows authenticated team members to configure and manage feature flags, experiments, environments, and SDK connections.
 
 For example, users can adjust a flag's value to determine whether it is active or not in a given environment. They can also add rules for flags to customize their behavior on a per-environment basis.
 
-Users can create experiments either using provided templates for switchback or A/B tests, or build their own free-form. Even after an experiment is created (but not yet started), users can manage flags, groups, treatments, and define dependent variables. 
+Users can also create experiments either using provided templates for switchback or A/B tests, or build their own free-form. Post-creation, users can continue to make changes such as adding or removing flags, defining new groups, revising treatments, and defining dependent variables.
 
-## Feature Flagging & Experimentation Server
+## Flagging and Management API Servers
 
 Cattails is a Fastify server that mediates all interactions with feature flag, experiment, and environment data, from both the admin dashboard and from client applications when they request flag values.
 
@@ -67,8 +76,12 @@ On the client-facing side, requests are authenticated by the presence of a valid
 
 ## Database
 
-Avocet stores feature flags, experiments, environments, and client SDK connections in a local MongoDB instance that can be deployed onto a dedicated machine. Schema validation and transactions are implemented on cattails via the Mongo driver. A discussion of why we chose MongoDB.
+Avocet stores feature flags, experiments, environments, and client SDK connections in a MongoDB instance that can be deployed onto a dedicated machine. Schema validation and transactions are implemented on cattails via the Mongo driver.
+<a href="/content/case-study/engineering-decisions#use-a-document-database">A discussion of why we chose MongoDB</a>.
 
-## SDK Package
+## Package
 
-The SDK package permits client-side and server-side JavaScript applications to fetch feature flag values from cattails.
+Our SDK, offered as a package, permits JavaScript applications to fetch feature flag values from the flagging API. It offers both synchronous and asynchronous flag check methods, each with their own tradeoffs.
+<a href="/content/case-study/engineering-decisions#cache-feature-flag-data-on-clients">For more on this, see cache feature flag data on clients</a>.
+
+The core package contains type definitions, Zod schema, and GraphQL schema for setting up the telemetry server. We also have an unpublished package that’s used by the management and flagging APIs to interact with our Mongo database.

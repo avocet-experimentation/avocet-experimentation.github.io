@@ -1,11 +1,11 @@
 ---
-title: Technical Challenges during Development
-description: This section provides an overview of Background.
+title: Technical Challenges
+description: This section details the technical hurdles faced by the Avocet team during development, highlighting innovative solutions to complex engineering challenges.
 ---
 
-## Implementing Runntime Type Validation
+## Implementing Runtime Type Validation
 
-We initially used Mongoose on cattails, but quickly encountered its limitations, which prompted us to consider alternatives. One key issue was Mongoose’s typing constraints, particularly its document transform function, which relies on long-standing workarounds like “as” assertions. Furthermore, Mongoose only supports type validation within Mongo queries, whereas we require type validation in other parts of our application, such as the dashboard, where feature flags and experiments are created.
+We initially used Mongoose for our APIs to interact with the database, but quickly encountered its limitations, which prompted us to consider alternatives. One key issue was Mongoose’s typing constraints, particularly its document transform function, which relies on long-standing workarounds like “as” assertions. Furthermore, Mongoose only supports type validation within Mongo queries, whereas we require type validation in other parts of our application, such as the dashboard, where feature flags and experiments are created.
 
 We evaluated a few options:
 - `io-ts`, a popular package for runtime validation, requires schema to be written in its own syntax, which is highly functional and yields less readable schema. This was not a good fit since we wanted an object-oriented schema which we could directly reference when developing Avocet.
@@ -13,8 +13,6 @@ We evaluated a few options:
 - Zod would require us to rewrite all our types from the ground up as Zod schema, but against the alternatives, and based on repeated confusions that arose around the structure of feature flags and experiments, it was clearly worth the time. As a bonus it permits more precise type definitions than TypeScript (TS) itself does, permitting schema for nonnegative integers, non-empty strings, and so on.
 
 Zod let us infer TS types directly from schema, but these types lacked the readable in-editor hints that TS offers. Writing TS types in parallel would work but then mean we no longer had a single source of truth for types, and any mismatch between a schema or the corresponding type would risk silent bugs. We eventually found a solution that let us maintain a single source of truth, runtime validation and readable type hints: instead of types or interfaces, we created classes that implemented those Zod schema, and used those classes for type annotations.
-
-[Diagram]
 
 ## Managing Extended References
 
@@ -41,18 +39,13 @@ We ultimately decided to send plain IDs, as the risks were minor. Later, we may 
 
 ## Developing Data APIs
 
-We developed the dashboard and the admin server in tandem. The admin server’s API changed frequently, and these changes typically caused corresponding data-fetching code on the dashboard to break. Furthermore, these components needed to work with many types of data (feature flags, experiments, environments, client property definitions, SDK connections, and dashboard users), each of which would require several routes on cattails in the REST model. We decided to use GraphQL to reduce this development friction, speed up API development, and reduce the admin API to a single route.
+We developed the dashboard and the management API in tandem. The management API underwent frequent changes during development, and this would often break corresponding data-fetching code on the dashboard. Furthermore, these components needed to work with several types of data (feature flags, experiments, environments, and SDK connections; and potentially also client property definitions and dashboard users), each of which would require several routes in the REST model. We decided to use GraphQL to reduce dashboard development friction, speed up API development, and reduce the management API to a single route.
 
-This presented some drawbacks, though. For one, there were costs associated with learning and implementing GraphQL, which was a new tool to all of us. These costs were acceptable, however, because we already needed to use GraphQL to make our project work with any telemetry database. More significantly, the GraphQL schema we wrote for the admin API are essentially duplicates of our type definitions, and as such any changes to types in our core package needed to be replicated in the GraphQL schema. However, we could set up GraphQL schema inference directly from our classes with TypeGraphQL.
+This presented some drawbacks. For one, there were costs associated with learning and implementing GraphQL, which was a new tool to all of us. These costs were acceptable, however, because we already needed to
+<a href="/content/case-study/engineering-decisions#integrate-with-any-telemetry-pipeline">use GraphQL to make our project work with any telemetry database</a>.
+More significantly, the GraphQL schema we wrote for the admin API are essentially duplicates of our type definitions, and as such any changes to types in our core package needed to be replicated in the GraphQL schema. However, we could in the future infer GraphQL schema directly from our classes using
+<a href="https://typegraphql.com/" target="_blank" rel="noopener">TypeGraphQL</a>.
 
-GraphQL offered some other advantages, such as a convenient interface (GraphiQL; note the “i”) for trying out queries, along with a catalog of available queries and autocompletion features. This allowed all team members to understand how to write GraphQL requests without having to look at cattails’ code or at documentation that was often out of date as our routes evolved quickly in tandem with our needs. GraphQL also offered another form of runtime type validation by checking requests against its schema. Additionally, the ecosystem of tools that GraphQL provides could enable some easy-to-implement extensions in the future, such as embedding a GraphiQL widget into the admin dashboard to empower users to make custom queries with schema-driven hints, enhancing usability.
-
-## Known Limitations
-
-If a client fails to fetch the value of a feature flag, it falls back on null. Depending on the phrasing of conditional logic involving flag values, this may cause undesirable behavior. We recommend either explicitly handling the null case, or consistently using falsy flag values to fall back onto some known safe functionality.
-
-Flag values are only updated when clients request them. If autorefresh is off, a flag will not be updated unless the SDK is reinitialized, which is typically only when the application restarts.
-
-Browser applications present some risks. For one, users can tamper with feature flag gates. This is a limitation of frontend apps, however, rather than one specific to our application. Another risk is that SDK API keys can be leaked, since the key will be visible in outbound request bodies. This key could be used to execute denial of service attacks against the flagging API; protections such as CORS and cookies can be circumvented by spoofing the Origin header or parsing responses to get cookies and then assigning them. If either of these is a concern, we recommend moving sensitive functionality and SDK usage to server-side code.
-
-Flags cannot be defined as dependent on other flags, which can become an issue if flags are used long-term to gate features and other newer features are built that rely on gated features. Dependent flags are still possible, however, by checking all flags upstream in a flag’s dependency chain.
+GraphQL also offered some secondary advantages.
+<a href="https://github.com/graphql/graphiql/tree/main/packages/graphiql" target="_blank" rel="noopener">GraphiQL</a>
+(note the “i”) is a convenient interface for prototyping requests that provides a catalog of available queries and mutations as well as autocompletion features. This allowed all team members to understand how to phrase data fetching requests, whereas before GraphQL we instead needed to look at the management API’s code, or at documentation that was not always up to date since our routes evolved quickly. GraphQL also offers runtime type validation, by checking requests against its schema. Finally, the ecosystem of tools that GraphQL provides could enable some easy-to-implement extensions in the future, such as embedding a GraphiQL widget into the admin dashboard to empower users to make custom queries to the telemetry server with schema-driven hints, enhancing usability.

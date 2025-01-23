@@ -19,14 +19,19 @@ export const NAVLINKS = [
     newTab: false,
   },
   {
-    title: "GitHub",
-    href: "https://github.com/avocet-experimentation",
-    newTab: true,
-  },
-  {
     title: "Documentation",
     href: ``,
     newTab: false,
+  },
+  {
+    title: "Our Team",
+    href: "/our-team",
+    newTab: false,
+  },
+  {
+    title: "GitHub",
+    href: "https://github.com/avocet-experimentation",
+    newTab: true,
   },
 ];
 

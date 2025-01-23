@@ -39,7 +39,7 @@ We opted to manage data using the
 <a href="https://en.wikipedia.org/wiki/Data_mapper_pattern" target="_blank" rel="noopener">data mapper pattern</a>
 , a design pattern in which data mappers are classes containing all logic for transferring data between a database and memory. Functions for working with fetched documents such as feature flags and experiments were kept as static methods. These classes also served as a convenient location to place static helper methods for templating and common yet easy-to-get-wrong operations on some of our most complex objects (feature flags and experiments). These operations included adding a feature flag or group to an experiment, or enabling/disabling a feature flag on a given environment.This allowed us to keep feature flag and experiment data as bare objects, avoiding the performance costs of instantiating these objects.
 
-[Diagram]
+![Data Mapper Pattern](/data-mapper-pattern.png)
 
 ### Cache feature flag data on clients
 

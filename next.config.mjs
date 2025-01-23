@@ -1,11 +1,10 @@
 /** @type {import('next').NextConfig} */
 
 const isProd = process.env.NODE_ENV === 'production';
-const repoName = 'avocet.github.io'
 
 const nextConfig = {
-  assetPrefix: isProd ? `/${repoName}/` : '',
-  basePath: isProd ? `/${repoName}` : '',
+  assetPrefix: isProd ? '/' : '',
+  basePath: isProd ? '' : '',
   output: 'export',
   distDir: 'dist',
   images: {

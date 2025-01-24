@@ -79,9 +79,10 @@ On the client-facing side, requests are authenticated by the presence of a valid
 Avocet stores feature flags, experiments, environments, and client SDK connections in a MongoDB instance that can be deployed onto a dedicated machine. Schema validation and transactions are implemented on cattails via the Mongo driver.
 <a href="/case-study/engineering-decisions#use-a-document-database">A discussion of why we chose MongoDB</a>.
 
-## Package
+## Packages
 
-Our SDK, offered as a package, permits JavaScript applications to fetch feature flag values from the flagging API. It offers both synchronous and asynchronous flag check methods, each with their own tradeoffs.
-<a href="/case-study/engineering-decisions#cache-feature-flag-data-on-clients">For more on this, see cache feature flag data on clients</a>.
+Our SDK, offered as an [npm package](https://www.npmjs.com/package/@avocet/sdk), permits JavaScript applications to fetch feature flag values from the flagging API. It offers both synchronous and asynchronous flag check methods, each with their own tradeoffs. For more on this, see <a href="/case-study/engineering-decisions#cache-feature-flag-data-on-clients">cache feature flag data on clients</a>.
 
-The core package contains type definitions, Zod schema, and GraphQL schema for setting up the telemetry server. We also have an unpublished package that’s used by the management and flagging APIs to interact with our Mongo database.
+We also provide a [core package](https://www.npmjs.com/package/@avocet/core) containing type definitions, Zod schema, and GraphQL schema for setting up the telemetry server.
+
+Finally, the management and flagging APIs use the [mongo-client package](https://www.npmjs.com/package/@avocet/mongo-client) to interact with Avocet’s database.

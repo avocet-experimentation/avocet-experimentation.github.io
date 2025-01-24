@@ -17,7 +17,7 @@ Feature flagging greatly simplifies this process, since a single build that util
 
 Designing a sound experiment can be tricky, and each experiment needs its own design. Some design patterns are frequently useful, however, and have become staples in experimentation across disciplines. The most popular experimental design, the A/B test, involves subjects randomly assigned to one of two or more groups, with each group concurrently receiving a different treatment. This pattern is popular for a good reason, but there is a significant set of research questions that it does not serve well. In another design, the switchback test (aka reversal design), first the treatment being evaluated is applied to all subjects, and then the control is applied (in other words, subjects are switched back to the baseline). This sequence is then repeated at least once to improve the validity of results. While switchback tests are less common than A/B tests in formal research, they are ubiquitous in everyday experimentation. If you’ve ever toggled a light switch on and then off a couple of times to see if it works, you’ve done a switchback test!
 
-![AB vs. Switchback](/ab-vs-switchback.png)
+![AB / Switchback Test Details](/ab-switchback-details.png)
 
 There are many more patterns, each offering a different set of tradeoffs, and a comprehensive comparison of them is beyond the scope of this text. However, we can illustrate the importance of design choice by examining the tradeoff between A/B and switchback tests for one specific concern in experiment design: inter-condition effects. “Condition,” in this text, means “combination of group and treatment,” and inter-condition effects are causal interdependencies between conditions.
 

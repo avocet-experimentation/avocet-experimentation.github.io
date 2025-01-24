@@ -6,17 +6,14 @@ title: Terminology
 
 A **feature flag** is a tool that allows developers and product teams to enable, disable, or modify features in an application without deploying new code. Feature flags act as a control mechanism to dynamically manage feature availability and behavior, providing a way to test, release, and iterate on features more efficiently.
 
-> **Note**: It is important to acknowledge that feature flags come with drawbacks, such as technical debt, as they can accumulate over time if not properly managed. Left unchecked, feature flags may lead to complex codebases with hidden dependencies or conditions, making the system harder to maintain and troubleshoot.
-
 ### Override Rule
 
-An **override rule** determines what value to respond with when a client requests the value of a feature flag. Override rules are environment-specific. Avocet offers two types of such rules: **forced values**, and **experiments**. Forced value rules are straightforward: they apply a constant value to a flag, across all users in an environment. These permit a flag to set a value other than the flag’s base value or the null fallback.
+An **override rule** determines what value to respond with when a client requests the value of a feature flag. Override rules are environment-specific. Avocet offers two types of such rules: **forced values**, and **experiments**. Forced value rules are straightforward: they apply a constant value to a flag, across all users in an environment. These permit a flag to set a value other than the flag’s base value or the null fallback. Avocet experiments involve assigning a user to a group and then selecting the value currently set for that group on the requested flag.
 
 ### Experiment
 
-An **experiment** is a systematic evaluation of the impact of a change or variation in an application to make data-driven decisions. Experiments aim to evaluate how changes in features, design, or functionality affect user behavior, system performance, or other key metrics.
+An **experiment** is a systematic evaluation of the impact of a change or variation in an application to make data-driven decisions. In software, experiments aim to evaluate how changes in features, design, or functionality affect user behavior, system performance, or other key metrics.
 
 ### Environment
 
-An **environment** refers to a distinct deployment context where feature flags, experiments, and configurations are applied and managed. Environments are typically used to separate different stages of the software development lifecycle or to cater to different operational needs.
-
+In Avocet, an **environment** is a distinct deployment context where feature flags can have different behavior than in other environments, as defined by override rules. Environments are typically used to separate different stages of the software development lifecycle or to cater to different operational needs.

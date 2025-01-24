@@ -39,14 +39,6 @@ export const CASE_STUDY_ROUTES: EachRoute[] = [
             title: "Terminology",
             href: "/terminology",
           },
-          {
-            title: "Theory",
-            href: "/theory",
-          },
-          {
-            title: "References",
-            href: "/references",
-          },
         ]
       },
 

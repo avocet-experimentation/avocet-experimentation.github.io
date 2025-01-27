@@ -20,7 +20,7 @@ const codeFont = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Avocet - Experimentation",
+  title: "Avocet",
   description:
     "Avocet is an open-source feature flagging and software experimentation platform capable of integrating with any telemetry infrastructure.",
 };

@@ -1,9 +1,9 @@
 ---
 title: Engineering Decisions
-description: This section details the critical technical design choices behind Avocet, focusing on optimizing read performance and ensuring flexible, secure deployment for organizations.
+description: When developing Avocet, we made two critical technical design choices: (1) optimize for flag read performance, and (2) provide great flexibility in how Avocet can be deployed.
 ---
 
-## Optimize for Read Operations on Feature Flags
+## Optimize for Fast Feature Flag Reads
 
 For flag and experiment data, we expected a low, and roughly constant, write rate since the number of concurrent users signed into the dashboard is unlikely to scale to even a few dozen. However, we had to prepare for a very high read rate, since read volume scales directly with the number of concurrent client applications using our feature flags. Slow reads risked degrading client UX by delaying initial caching of flag data, and possibly by increasing the number of dropped requests, forcing client apps to fall back onto stale or null values. We chose to optimize very heavily for read performance, even at the expense of write performance.
 

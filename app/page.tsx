@@ -23,7 +23,8 @@ export default function Home() {
         Experiment on-the-fly
       </h1>
       <p className="mb-8 sm:text-md max-w-[800px] text-muted-foreground">
-        Avocet is an open-source feature flagging and software experimentation platform capable of integrating with any telemetry infrastructure.
+        Avocet is an open-source feature flagging and software experimentation platform capable of integrating with
+        any telemetry infrastructure and offering users great flexibility in how they design experiments.
       </p>
       <div>
         <Link
@@ -33,7 +34,7 @@ export default function Home() {
             size: "lg",
           })}
         >
-          Get Stared
+          Get Started
         </Link>
       </div>
     </div>

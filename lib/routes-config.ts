@@ -31,15 +31,8 @@ export const CASE_STUDY_ROUTES: EachRoute[] = [
         href: "/technical-challenges",
       },
       {
-        title: "Appendices",
-        href: "/appendices",
-        noLink: true,
-        items: [
-          {
-            title: "Terminology",
-            href: "/terminology",
-          },
-        ]
+        title: "Terminology",
+        href: "/terminology",
       },
 
 ];

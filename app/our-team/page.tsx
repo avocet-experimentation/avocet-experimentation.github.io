@@ -54,7 +54,7 @@ const OurTeam: React.FC = () => {
   const teamMembers = [
     {
       name: "Gautam Panakkal",
-      image: "/api/placeholder/200/200",
+      image: "/gautam.jpg",
       github: "https://github.com/gpanakkal",
       linkedin: "https://www.linkedin.com/in/gautam-panakkal/",
       website: ""

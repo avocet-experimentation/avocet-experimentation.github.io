@@ -68,7 +68,7 @@ const OurTeam: React.FC = () => {
     },
     {
       name: "Sean Mentele",
-      image: "/api/placeholder/200/200",
+      image: "/sean.jpeg",
       github: "https://github.com/SeanM0124",
       linkedin: "https://www.linkedin.com/in/sean-mentele-58481417a/",
       website: ""

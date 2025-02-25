@@ -34,7 +34,7 @@ export default function Home() {
             size: "lg",
           })}
         >
-          Get Started
+          Learn More
         </Link>
       </div>
     </div>

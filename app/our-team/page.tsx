@@ -61,7 +61,7 @@ const OurTeam: React.FC = () => {
     },
     {
       name: "Adnan Shihabi",
-      image: "/api/placeholder/200/200",
+      image: "/adnan.jpg",
       github: "https://github.com/sadonyx",
       linkedin: "https://www.linkedin.com/in/adnanshihabi/",
       website: "https://ashihabi.me"

@@ -59,11 +59,18 @@ SDK connections can be created in the dashboard to enable applications to connec
 
 ## Administrative Dashboard
 
-The Admin dashboard is a React application that allows authenticated team members to configure and manage feature flags, experiments, environments, and SDK connections.
+A React application that allows authenticated users to configure and manage feature flags, experiments, environments, and SDK connections.
 
-For example, users can adjust a flag's value to determine whether it is active or not in a given environment. They can also add rules for flags to customize their behavior on a per-environment basis.
+![Feature flag setup form](/ui-flag-setup-form-2.png)
+*Creating a new feature flag*
 
-Users can also create experiments either using provided templates for switchback or A/B tests, or build their own free-form. Post-creation, users can continue to make changes such as adding or removing flags, defining new groups, revising treatments, and defining dependent variables.
+Users can enable or disable a flag in a specific environment, or add rules for flags to further customize their behavior per environment.
+
+![Feature flag management page](/ui-flag-details-2.png)
+
+Users can also create experiments either using provided templates for switchback or A/B tests, or build their own free-form. Before an experiment is launched, users can continue to make changes such as adding or removing flags, defining new groups, revising treatments, and defining dependent variables, as shown below.
+
+![Experiment management page in our dark theme](/ui-experiment-details-dark-2.png)
 
 ## Flagging and Management API Servers
 
